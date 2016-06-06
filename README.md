@@ -23,6 +23,8 @@ Todo:
 
 3.Add Ceil Comment support!
 
+4.Trim the empty Row and Column!
+
 Inspired By:
 
 1.FastExcel:https://github.com/mrjono1/FastExcel/tree/master/FastExcel
