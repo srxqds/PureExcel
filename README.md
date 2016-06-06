@@ -6,7 +6,7 @@ This is a simple excel reader, it can run on any .Net Framework.
 As we know, Excel 2007 is a open xml format and compress with Zip foramt.
 
 It have no third library dependence and almost can run any .net framwork(No Excel Interop, No Open XML SDK
-and No using Linq and Xml of C# System api), 
+and No using Linq, Xml and DataSet of C# System api), 
 maybe on window mobile you shoud modify a little for the missing api.
 
 I use the ZipArchive(https://github.com/srxqds/ZipWrapper) and XMLParser(https://github.com/srxqds/XMLParser).
