@@ -1,4 +1,4 @@
-# ExcelParser
+# PureExcel
 A lightweight excel(2007-) parser!
 
 This is a simple excel reader, it can run on any .Net Framework.
