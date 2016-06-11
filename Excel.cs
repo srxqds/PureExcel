@@ -8,25 +8,21 @@
 // 模块描述：
 //----------------------------------------------------------------*/
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Text;
 
-namespace Excel
+namespace PureExcel
 {
-    public partial class FastExcel: IDisposable
+    public partial class Excel: IDisposable
     {
         public string FileName { get; private set; }
         
         internal SharedStrings SharedStrings { get; set; }
         internal ZipArchive Archive { get; set; }
-
-
-        public FastExcel(string excelFile)
+        
+        public Excel(string excelFile)
         {
             this.FileName = excelFile;
-            
         }
 
         internal void PrepareArchive()
@@ -36,7 +32,6 @@ namespace Excel
 				Archive = ZipArchive.Open(this.FileName, FileAccess.Read);
                 Archive.Entries = Archive.GetEntries();
             }
-
             // Get Strings file
             if (this.SharedStrings == null )
             {
@@ -44,13 +39,6 @@ namespace Excel
             }
         }
         
-        public class WorksheetProperties
-        {
-            public int CurrentIndex { get; set; }
-            public int SheetId { get; set; }
-            public string Name { get; set; }
-        }
-
         /// <summary>
         /// Saves any pending changes to the Excel stream and adds/updates associated files if needed
         /// </summary>
@@ -66,7 +54,6 @@ namespace Excel
             {
                 return;
             }
-
             this.Archive.Dispose();
         }
     }

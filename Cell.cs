@@ -8,10 +8,9 @@
 // 模块描述：
 //----------------------------------------------------------------*/
 using System;
-using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Excel
+namespace PureExcel
 {
     /// <summary>
     /// Contains the actual value
@@ -21,8 +20,7 @@ namespace Excel
         /// <summary>
         /// Column Numnber (Starts at 1)
         /// </summary>
-        public int ColumnNumber { get; set; }
-
+        public int ColumnIndex { get; set; }
         /// <summary>
         /// The value that is stored
         /// </summary>
@@ -35,24 +33,17 @@ namespace Excel
         /// <param name="sharedStrings">The collection of shared strings used by this document</param>
 		public Cell(XMLNode cellElement, SharedStrings sharedStrings)
         {
-			bool isTextRow = cellElement.GetValue ("@t") == "s";
+			bool iShareString = cellElement.GetValue ("@t") == "s";
 			string columnName = cellElement.GetValue ("@r");
 
-            this.ColumnNumber = GetExcelColumnNumber(columnName);
-
-            if (isTextRow)
+            this.ColumnIndex = GetExcelColumnNumber(columnName);
+            this.Value = cellElement.GetValue("v>0>_text");
+            if (this.Value != null && iShareString)
             {
-				string textValue = cellElement.GetValue ("v>0>_text");
-				this.Value = sharedStrings.GetString(textValue);
+				this.Value = sharedStrings.GetString(this.Value);
             }
-            else
-            {
-				this.Value = cellElement.GetValue("_text");
-            }
-
         }
 
-        
         //http://stackoverflow.com/questions/181596/how-to-convert-a-column-number-eg-127-into-an-excel-column-eg-aa
         /// <summary>
         /// Convert Column Number into Column Name - Character(s) eg 1-A, 2-B
@@ -88,7 +79,6 @@ namespace Excel
             {
                 columnName = Regex.Replace(columnName, @"\d", "");
             }
-
             int[] digits = new int[columnName.Length];
             for (int i = 0; i < columnName.Length; ++i)
             {
@@ -102,7 +92,5 @@ namespace Excel
             }
             return res;
         }
-
-        
     }
 }

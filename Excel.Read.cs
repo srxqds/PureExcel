@@ -7,11 +7,10 @@
 // 创建日期：June 03 2016
 // 模块描述：
 //----------------------------------------------------------------*/
-using System.Linq;
 
-namespace Excel
+namespace PureExcel
 {
-    public partial class FastExcel
+    public partial class Excel
     {
         public Worksheet Read(int sheetNumber)
         {

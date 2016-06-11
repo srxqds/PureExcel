@@ -9,9 +9,8 @@
 //----------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace Excel
+namespace PureExcel
 {
     /// <summary>
     /// Row that contains the Cells
@@ -21,61 +20,53 @@ namespace Excel
         /// <summary>
         /// The Row Number (Row numbers start at 1)
         /// </summary>
-        public int RowNumber { get; set; }
-
+        public int RowIndex { get; set; }
         /// <summary>
         /// The collection of cells for this row
         /// </summary>
-        public IEnumerable<Cell> Cells { get; set; }
+        public List<Cell> Cells { get; internal set; }
 
-        /// <summary>
-        /// Create a new Row
-        /// </summary>
-        /// <param name="rowNumber">Row number starting with 1</param>
-        /// <param name="cells">Cells on this row</param>
-        public Row(int rowNumber, IEnumerable<Cell> cells)
-        {
-            if (rowNumber <= 0)
-            {
-                throw new Exception("Row numbers starting at 1");
-            }
-            this.RowNumber = rowNumber;
-            this.Cells = cells;
-        }
-
+        internal int ColumnStart { get; private set; }
+        internal int ColumnEnd { get; private set; }
+        
 		public Row(XMLNode rowElement, SharedStrings sharedStrings)
         {
             try
             {
-				this.RowNumber = int.Parse(rowElement.GetValue("@r"));
+				this.RowIndex = int.Parse(rowElement.GetValue("@r"));
             }
             catch (Exception ex)
             {
                 throw new Exception("Row Number not found", ex);
             }
-
-			XMLNodeList cellList = rowElement.GetNodeList ("c");
-                        
+			XMLNodeList cellList = rowElement.GetDeepNodeList("c");
+		    this.Cells = new List<Cell>();
 			if (cellList != null && cellList.Count > 0)
             {
-				this.Cells = GetCells(rowElement.GetNodeList("c"), sharedStrings);
+                this.Cells = GetCells(cellList, sharedStrings);
             }
         }
 
-		private IEnumerable<Cell> GetCells(XMLNodeList rowElement, SharedStrings sharedStrings)
+		private List<Cell> GetCells(XMLNodeList rowElement, SharedStrings sharedStrings)
         {
+            List<Cell> cellList = new List<Cell>();
 			foreach (XMLNode cellElement in rowElement)
             {
                 Cell cell = new Cell(cellElement, sharedStrings);
-                if (cell.Value != null)
+                if (!string.IsNullOrEmpty(cell.Value))
                 {
-                    yield return cell;
+                    string valueTrim = cell.Value.Trim();
+                    if (!string.IsNullOrEmpty(valueTrim))
+                    {
+                        cellList.Add(cell);
+                        if (cell.ColumnIndex < ColumnStart)
+                            ColumnStart = cell.ColumnIndex;
+                        else if (cell.ColumnIndex > ColumnEnd)
+                            ColumnEnd = cell.ColumnIndex;
+                    }
                 }
             }
+		    return cellList;
         }
-
-        
-
-        
     }
 }

@@ -7,33 +7,42 @@
 // 创建日期：June 03 2016
 // 模块描述：
 //----------------------------------------------------------------*/
-using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO.Compression;
-using System.IO;
 
-namespace Excel
+namespace PureExcel
 {
     public class Worksheet
     {
+        //common escape char by xml
+        public const string LtEscape = "&lt;";//<
+        public const string Lt = "<";
+        public const string GtEscape = "&gt;";//>
+        public const string Gt = ">";
+        public const string AmpEscape = "&amp;";//&
+        public const string Amp = "&";
+        public const string AposEscape = "&apos;";//'
+        public const string Apos = "'";
+        public const string QuotEscape = "&quot;";//"
+        public const string Quot = "\"";
         /// <summary>
         /// Collection of rows in this worksheet
         /// </summary>
-        public IEnumerable<Row> Rows { get; set; }
-
-        public IEnumerable<string> Headings { get; set; }
-
+        public List<Row> Rows { get; set; }
         public int Index { get; internal set; }
         public string Name { get; set; }
 
-        public FastExcel FastExcel { get; private set; }
+        public int RowCount { get; internal set; }
+        public int ColumnCount { get; internal set; }
+
+        public Excel Excel { get; private set; }
+        
+        private int ColumnStart { get; set; }
 
         internal string FileName
         {
             get
             {
-                return Worksheet.GetFileName(this.Index);
+                return GetFileName(this.Index);
             }
         }
 
@@ -41,50 +50,62 @@ namespace Excel
         {
             return string.Format("xl/worksheets/sheet{0}.xml", index);
         }
-
-        public Worksheet() { }
-
-        public Worksheet(FastExcel fastExcel)
+        
+        public Worksheet(Excel excel)
         {
-            FastExcel = fastExcel;
+            Excel = excel;
         }
 
-        public bool Exists
+        public string GetCell(int rowIndex, int columnIndex, string defaultValue = "")
         {
-            get
+            if (rowIndex < 0 || rowIndex > RowCount-1
+                || columnIndex < 0 || columnIndex > ColumnCount)
+                return defaultValue;
+            Row row = this.Rows[rowIndex];
+            foreach (Cell cell in row.Cells)
             {
-                return !string.IsNullOrEmpty(this.FileName);
+                if (cell.ColumnIndex == columnIndex + ColumnStart)
+                {
+                    string cellValue = cell.Value;
+                    cellValue = cellValue.Replace(LtEscape, Lt);
+                    cellValue = cellValue.Replace(GtEscape, Gt);
+                    cellValue = cellValue.Replace(AmpEscape, Amp);
+                    cellValue = cellValue.Replace(AposEscape, Apos);
+                    cellValue = cellValue.Replace(QuotEscape, Quot);
+                    return cellValue;
+                }
             }
+            return defaultValue;
         }
-
-
         public void Read()
         {
-            FastExcel.PrepareArchive();
+			XMLNode document = XMLParser.Parse(Excel.Archive.GetXmlText(FileName));
+            XMLNodeList rowList = document.GetNodeList("worksheet>0>sheetData>0>row");
+            
+            Rows = GetRows(rowList);
+            this.RowCount = Rows.Count;
             
             
-            IEnumerable<Row> rows = null;
-
-            //using (Stream stream = FastExcel.Archive.GetXmlStream(FileName))
-            //{
-			XMLNode document = XMLParser.Parse(FastExcel.Archive.GetXmlText(FileName));
-            int skipRows = 0;
-
-			XMLNodeList rowList = document.GetNodeList("worksheet>0>sheetData>0>row");
-
-			rows = GetRows(rowList);
-            //}
-
-            Rows = rows;
         }
 
-		private IEnumerable<Row> GetRows(XMLNodeList rowElements)
+		private List<Row> GetRows(XMLNodeList rowElements)
         {
+            List<Row> rowList = new List<Row>();
+		    int columnEnd = 0;
             foreach (XMLNode rowElement in rowElements)
             {
-                yield return new Row(rowElement, FastExcel.SharedStrings);
+                Row row = new Row(rowElement, Excel.SharedStrings);
+                if (row.Cells != null && row.Cells.Count != 0)
+                {
+                    rowList.Add(row);
+                    if (row.ColumnStart < ColumnStart)
+                        ColumnStart = row.ColumnStart;
+                    if (row.ColumnEnd > columnEnd)
+                        columnEnd = row.ColumnEnd;
+                }
             }
+		    this.ColumnCount = columnEnd - this.ColumnStart;
+		    return rowList;
         }
-
     }
 }

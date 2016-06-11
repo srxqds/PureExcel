@@ -9,15 +9,12 @@
 //----------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
 
-namespace Excel
+namespace PureExcel
 {
-    public partial class FastExcel
+    public partial class Excel
     {
         private Worksheet[] _worksheets;
-
         /// <summary>
         /// List of worksheets, loaded on first access of property
         /// </summary>
@@ -51,14 +48,12 @@ namespace Excel
             {
                 throw new Exception("Unable to load workbook.xml");
             }
-
 			XMLNodeList nodeList = document.GetNodeList ("workbook>0>sheets>0>sheet");
 
 			foreach (XMLNode node in nodeList)
             {
                 var worksheet = new Worksheet(this);
 				worksheet.Index = int.Parse(node.GetValue ("@sheetId"));
-
 				worksheet.Name = node.GetValue ("@name");
                 worksheets.Add(worksheet);
             }
