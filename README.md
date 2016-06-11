@@ -17,13 +17,13 @@ but it should use some editor work and no performance requirement situation!
 
 Todo:
 
-1.More flexible api to work!
+1.More flexible api to work!(done)
 
-2.Test and fix the bug and handle some unexpect situation.
+2.Test and fix the bug and handle some unexpect situation.(done)
 
 3.Add Ceil Comment support!
 
-4.Trim the empty Row and Column!
+4.Trim the empty Row and Column!(done)
 
 Inspired By:
 
