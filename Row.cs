@@ -30,7 +30,7 @@ namespace PureExcel
 
         internal int ColumnStart { get; private set; }
         internal int ColumnEnd { get; private set; }
-        
+
 		internal Row(XMLNode rowElement, SharedStrings sharedStrings)
         {
             ColumnStart = 1;
@@ -50,29 +50,16 @@ namespace PureExcel
             }
         }
 
-        public Cell GetCell(int columnIndex)
+        public Cell GetCell(int columnId)
         {
             foreach (Cell cell in Cells)
             {
-                if (cell.ColumnIndex == columnIndex + ColumnStart)
+                if (cell.ColumnIndex == columnId)
                 {
                     return cell;
                 }
             }
             return null;
-        }
-
-        public int GetColumnId(int columnIndex)
-        {
-            foreach (Cell cell in Cells)
-            {
-                if (cell.ColumnIndex == columnIndex + ColumnStart)
-                {
-                    return cell.ColumnIndex;
-                }
-            }
-            
-            return InValidColumn;
         }
 
         private

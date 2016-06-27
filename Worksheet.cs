@@ -35,14 +35,14 @@ namespace PureExcel
         public int ColumnCount { get; internal set; }
 
         public Excel Excel { get; private set; }
-        
+
         private int ColumnStart { get; set; }
 
         public Worksheet(Excel excel)
         {
             Excel = excel;
         }
-        
+
         //rowIndex and columnIndex begin from 0.
         //because worksheet trim the empty row ,and iterator cann't now which row is empty.
         public string GetCell(int rowIndex, int columnIndex, string defaultValue = "")
@@ -51,7 +51,7 @@ namespace PureExcel
                 return defaultValue;
 
             Row row = this.Rows[rowIndex];
-            Cell cell = row.GetCell(columnIndex);
+            Cell cell = row.GetCell(columnIndex + ColumnStart);
             if (cell == null)
                 return defaultValue;
             string cellValue = cell.Value;
@@ -68,14 +68,14 @@ namespace PureExcel
             string commentFile = "xl/comments" + Index + ".xml";
             string commentText = this.Excel.Archive.GetXmlText(commentFile);
             XMLNode commentRootNode = XMLParser.Parse(commentText);
-            
-            //default value 
+
+            //default value
             int columnName = columnIndex + 1;
             int rowName = rowIndex + 1;
             if (this.Rows != null && this.Rows.Count > rowIndex)
             {
                 Row row = this.Rows[rowIndex];
-                columnName = columnIndex + row.ColumnStart;
+                columnName = columnIndex + ColumnStart;
                 rowName = row.RowIndex;
             }
             string commentCeilName = Cell.GetExcelColumnName(columnName) + rowName;
@@ -106,7 +106,7 @@ namespace PureExcel
             string fileNameInZip = string.Format("xl/worksheets/sheet{0}.xml", Index);
             XMLNode document = XMLParser.Parse(Excel.Archive.GetXmlText(fileNameInZip));
             XMLNodeList rowList = document.GetNodeList("worksheet>0>sheetData>0>row");
-            
+
             Rows = GetRows(rowList);
             this.RowCount = Rows.Count;
         }
