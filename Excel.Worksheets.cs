@@ -22,15 +22,11 @@ namespace PureExcel
         {
             get
             {
-                if (_worksheets != null)
+                if (_worksheets == null)
                 {
-                    return _worksheets;
+                    _worksheets = GetWorksheetProperties(); 
                 }
-                else
-                {
-                    _worksheets = GetWorksheetProperties();
-                    return _worksheets;
-                }
+                return _worksheets;
             }
         }
 

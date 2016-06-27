@@ -17,6 +17,8 @@ namespace PureExcel
     /// </summary>
     public class Row
     {
+
+        public const int InValidColumn = 0;
         /// <summary>
         /// The Row Number (Row numbers start at 1)
         /// </summary>
@@ -29,8 +31,9 @@ namespace PureExcel
         internal int ColumnStart { get; private set; }
         internal int ColumnEnd { get; private set; }
         
-		public Row(XMLNode rowElement, SharedStrings sharedStrings)
+		internal Row(XMLNode rowElement, SharedStrings sharedStrings)
         {
+            ColumnStart = 1;
             try
             {
 				this.RowIndex = int.Parse(rowElement.GetValue("@r"));
@@ -47,7 +50,33 @@ namespace PureExcel
             }
         }
 
-		private List<Cell> GetCells(XMLNodeList rowElement, SharedStrings sharedStrings)
+        public Cell GetCell(int columnIndex)
+        {
+            foreach (Cell cell in Cells)
+            {
+                if (cell.ColumnIndex == columnIndex + ColumnStart)
+                {
+                    return cell;
+                }
+            }
+            return null;
+        }
+
+        public int GetColumnId(int columnIndex)
+        {
+            foreach (Cell cell in Cells)
+            {
+                if (cell.ColumnIndex == columnIndex + ColumnStart)
+                {
+                    return cell.ColumnIndex;
+                }
+            }
+            
+            return InValidColumn;
+        }
+
+        private
+            List<Cell> GetCells(XMLNodeList rowElement, SharedStrings sharedStrings)
         {
             List<Cell> cellList = new List<Cell>();
 			foreach (XMLNode cellElement in rowElement)

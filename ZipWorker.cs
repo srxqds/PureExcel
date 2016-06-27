@@ -11,7 +11,6 @@ using UnityEngine;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
-using UnityEditor;
 
 namespace PureExcel
 {
@@ -31,7 +30,8 @@ namespace PureExcel
             return xml;
         }
 
-		[MenuItem("Test/ParserExcel")]
+/*#if UNITY_EDITOR
+        [UnityEditor.MenuItem("Test/ParserExcel")]
 		public static void DoTest()
 		{
 			string excelFile = EditorUtils.ProjectPath + "Assets/Editor/GameConfig/c场景配置表1.xlsx";
@@ -46,12 +46,12 @@ namespace PureExcel
 				int cellIndex = 0;
 				foreach(Cell cell in row.Cells)
 				{
-					Debug.Log ("ceil(" + rowIndex + "," + cellIndex + "):" + cell.Value);
+					UnityEngine.Debug.Log ("ceil(" + rowIndex + "," + cellIndex + "):" + cell.Value);
 					cellIndex++;
 				}
 				rowIndex++;
 			}
-
 		}
+#endif*/
     }
 }

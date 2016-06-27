@@ -12,13 +12,12 @@ namespace PureExcel
 {
     public partial class Excel
     {
-        public Worksheet Read(int sheetNumber)
+        public Worksheet Read(int sheetIndex)
         {
-			//excel inde begin from 1
-			sheetNumber += 1;
+			//excel index begin from 1
 			foreach (Worksheet workSheet in Worksheets) 
 			{
-				if (workSheet.Index == sheetNumber) 
+				if (workSheet.Index == sheetIndex + 1) 
 				{
 					workSheet.Read ();
 					return workSheet;

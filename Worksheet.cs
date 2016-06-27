@@ -38,54 +38,77 @@ namespace PureExcel
         
         private int ColumnStart { get; set; }
 
-        internal string FileName
-        {
-            get
-            {
-                return GetFileName(this.Index);
-            }
-        }
-
-        public static string GetFileName(int index)
-        {
-            return string.Format("xl/worksheets/sheet{0}.xml", index);
-        }
-        
         public Worksheet(Excel excel)
         {
             Excel = excel;
         }
-
+        
+        //rowIndex and columnIndex begin from 0.
+        //because worksheet trim the empty row ,and iterator cann't now which row is empty.
         public string GetCell(int rowIndex, int columnIndex, string defaultValue = "")
         {
-            if (rowIndex < 0 || rowIndex > RowCount-1
-                || columnIndex < 0 || columnIndex > ColumnCount)
+            if (!IsCeilValid(rowIndex, columnIndex))
                 return defaultValue;
+
             Row row = this.Rows[rowIndex];
-            foreach (Cell cell in row.Cells)
+            Cell cell = row.GetCell(columnIndex);
+            if (cell == null)
+                return defaultValue;
+            string cellValue = cell.Value;
+            cellValue = cellValue.Replace(LtEscape, Lt);
+            cellValue = cellValue.Replace(GtEscape, Gt);
+            cellValue = cellValue.Replace(AmpEscape, Amp);
+            cellValue = cellValue.Replace(AposEscape, Apos);
+            cellValue = cellValue.Replace(QuotEscape, Quot);
+            return cellValue;
+        }
+
+        public string GetComment(int rowIndex, int columnIndex)
+        {
+            string commentFile = "xl/comments" + Index + ".xml";
+            string commentText = this.Excel.Archive.GetXmlText(commentFile);
+            XMLNode commentRootNode = XMLParser.Parse(commentText);
+            
+            //default value 
+            int columnName = columnIndex + 1;
+            int rowName = rowIndex + 1;
+            if (this.Rows != null && this.Rows.Count > rowIndex)
             {
-                if (cell.ColumnIndex == columnIndex + ColumnStart)
+                Row row = this.Rows[rowIndex];
+                columnName = columnIndex + row.ColumnStart;
+                rowName = row.RowIndex;
+            }
+            string commentCeilName = Cell.GetExcelColumnName(columnName) + rowName;
+            XMLNodeList commentList = commentRootNode.GetNodeList("comments>0>commentList>0>comment");
+            if (commentList != null && commentList.Count > 0)
+            {
+                foreach (XMLNode commentNode in commentList)
                 {
-                    string cellValue = cell.Value;
-                    cellValue = cellValue.Replace(LtEscape, Lt);
-                    cellValue = cellValue.Replace(GtEscape, Gt);
-                    cellValue = cellValue.Replace(AmpEscape, Amp);
-                    cellValue = cellValue.Replace(AposEscape, Apos);
-                    cellValue = cellValue.Replace(QuotEscape, Quot);
-                    return cellValue;
+                    if (commentNode.GetValue("@ref") == commentCeilName)
+                    {
+                        return commentNode.GetValue("text>0>r>1>t>0>_text");
+                    }
                 }
             }
-            return defaultValue;
+            return null;
         }
+
+        private bool IsCeilValid(int rowIndex, int columnIndex)
+        {
+            if (rowIndex < 0 || rowIndex > RowCount - 1
+                   || columnIndex < 0 || columnIndex > ColumnCount - 1)
+                return false;
+            return true;
+        }
+
         public void Read()
         {
-			XMLNode document = XMLParser.Parse(Excel.Archive.GetXmlText(FileName));
+            string fileNameInZip = string.Format("xl/worksheets/sheet{0}.xml", Index);
+            XMLNode document = XMLParser.Parse(Excel.Archive.GetXmlText(fileNameInZip));
             XMLNodeList rowList = document.GetNodeList("worksheet>0>sheetData>0>row");
             
             Rows = GetRows(rowList);
             this.RowCount = Rows.Count;
-            
-            
         }
 
 		private List<Row> GetRows(XMLNodeList rowElements)
