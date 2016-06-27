@@ -12,7 +12,7 @@ maybe on window mobile you shoud modify a little for the missing api.
 I use the ZipArchive(https://github.com/srxqds/ZipWrapper) and XMLParser(https://github.com/srxqds/XMLParser).
 
 
-but it should use some editor work and no performance requirement situation!
+but it should be used on some editor work and no performance requirement situation!
 
 Use Tips:
 
