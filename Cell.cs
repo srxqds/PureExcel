@@ -17,6 +17,17 @@ namespace PureExcel
     /// </summary>
     public class Cell
     {
+        //common escape char by xml
+        public const string LtEscape = "&lt;";//<
+        public const string Lt = "<";
+        public const string GtEscape = "&gt;";//>
+        public const string Gt = ">";
+        public const string AmpEscape = "&amp;";//&
+        public const string Amp = "&";
+        public const string AposEscape = "&apos;";//'
+        public const string Apos = "'";
+        public const string QuotEscape = "&quot;";//"
+        public const string Quot = "\"";
         /// <summary>
         /// Column Numnber (Starts at 1)
         /// </summary>
@@ -31,7 +42,7 @@ namespace PureExcel
         /// </summary>
         /// <param name="cellElement">Cell</param>
         /// <param name="sharedStrings">The collection of shared strings used by this document</param>
-		public Cell(XMLNode cellElement, SharedStrings sharedStrings)
+		internal Cell(XMLNode cellElement, SharedStrings sharedStrings)
         {
 			bool iShareString = cellElement.GetValue ("@t") == "s";
 			string columnName = cellElement.GetValue ("@r");
@@ -42,6 +53,16 @@ namespace PureExcel
             {
 				this.Value = sharedStrings.GetString(this.Value);
             }
+        }
+
+        public static string DecodeEscapeString(string cellValue)
+        {
+            cellValue = cellValue.Replace(LtEscape, Lt);
+            cellValue = cellValue.Replace(GtEscape, Gt);
+            cellValue = cellValue.Replace(AmpEscape, Amp);
+            cellValue = cellValue.Replace(AposEscape, Apos);
+            cellValue = cellValue.Replace(QuotEscape, Quot);
+            return cellValue;
         }
 
         //http://stackoverflow.com/questions/181596/how-to-convert-a-column-number-eg-127-into-an-excel-column-eg-aa

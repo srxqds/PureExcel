@@ -17,8 +17,8 @@ namespace PureExcel
     {
         public string FileName { get; private set; }
         
-        internal SharedStrings SharedStrings { get; set; }
-        internal ZipArchive Archive { get; set; }
+        internal SharedStrings m_SharedStrings { get; set; }
+        internal ZipArchive m_Archive { get; set; }
         
         public Excel(string excelFile)
         {
@@ -27,20 +27,20 @@ namespace PureExcel
 
         internal void PrepareArchive()
         {
-            if (this.Archive == null)
+            if (this.m_Archive == null)
             {
-				Archive = ZipArchive.Open(this.FileName, FileAccess.Read);
-                Archive.Entries = Archive.GetEntries();
+				m_Archive = ZipArchive.Open(this.FileName, FileAccess.Read);
+                m_Archive.Entries = m_Archive.GetEntries();
             }
             // Get Strings file
-            if (this.SharedStrings == null )
+            if (this.m_SharedStrings == null )
             {
-                this.SharedStrings = new SharedStrings(this.Archive);
+                this.m_SharedStrings = new SharedStrings(this.m_Archive);
             }
         }
         
         /// <summary>
-        /// Saves any pending changes to the Excel stream and adds/updates associated files if needed
+        /// Saves any pending changes to the m_Excel stream and adds/updates associated files if needed
         /// </summary>
         public void Dispose()
         {
@@ -50,11 +50,11 @@ namespace PureExcel
 
         protected virtual void Dispose(bool disposing)
         {
-            if (this.Archive == null)
+            if (this.m_Archive == null)
             {
                 return;
             }
-            this.Archive.Dispose();
+            this.m_Archive.Dispose();
         }
     }
 }

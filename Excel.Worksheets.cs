@@ -14,38 +14,32 @@ namespace PureExcel
 {
     public partial class Excel
     {
-        private Worksheet[] _worksheets;
+        private Worksheet[] m_Worksheets;
         /// <summary>
         /// List of worksheets, loaded on first access of property
         /// </summary>
-        public Worksheet[] Worksheets
+        public Worksheet[] WorkSheets
         {
             get
             {
-                if (_worksheets == null)
+                if (m_Worksheets == null)
                 {
-                    _worksheets = GetWorksheetProperties(); 
+                    m_Worksheets = GetWorksheetProperties(); 
                 }
-                return _worksheets;
+                return m_Worksheets;
             }
         }
 
         private Worksheet[] GetWorksheetProperties()
         {
             PrepareArchive();
-
             var worksheets = new List<Worksheet>();
-
-            string xmlText = this.Archive.GetXmlText("xl/workbook.xml");
-
-			XMLNode document = XMLParser.Parse(xmlText);
-
+			XMLNode document = this.m_Archive.GetXmlNode("xl/workbook.xml");
             if (document == null)
             {
                 throw new Exception("Unable to load workbook.xml");
             }
 			XMLNodeList nodeList = document.GetNodeList ("workbook>0>sheets>0>sheet");
-
 			foreach (XMLNode node in nodeList)
             {
                 var worksheet = new Worksheet(this);

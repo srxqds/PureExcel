@@ -15,7 +15,7 @@ namespace PureExcel
         public Worksheet Read(int sheetIndex)
         {
 			//excel index begin from 1
-			foreach (Worksheet workSheet in Worksheets) 
+			foreach (Worksheet workSheet in WorkSheets) 
 			{
 				if (workSheet.Index == sheetIndex + 1) 
 				{
@@ -28,7 +28,7 @@ namespace PureExcel
 
         public Worksheet Read(string sheetName)
         {
-			foreach (Worksheet workSheet in Worksheets) 
+			foreach (Worksheet workSheet in WorkSheets) 
 			{
 				if (workSheet.Name == sheetName) 
 				{

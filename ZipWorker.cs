@@ -7,7 +7,6 @@
 // 创建日期：June 04 2016
 // 模块描述：
 //----------------------------------------------------------------*/
-using UnityEngine;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
@@ -30,14 +29,22 @@ namespace PureExcel
             return xml;
         }
 
+        public static XMLNode GetXmlNode(this ZipArchive archive, string fileNameInZip)
+        {
+            string xmlText = GetXmlText(archive, fileNameInZip);
+            if (string.IsNullOrEmpty(xmlText))
+                return null;
+            return XMLParser.Parse(xmlText);
+        }
+
 /*#if UNITY_EDITOR
         [UnityEditor.MenuItem("Test/ParserExcel")]
 		public static void DoTest()
 		{
 			string excelFile = EditorUtils.ProjectPath + "Assets/Editor/GameConfig/c场景配置表1.xlsx";
 
-			Excel excel = new Excel(excelFile);
-			var works = excel.Worksheets;
+			m_Excel excel = new m_Excel(excelFile);
+			var works = excel.WorkSheets;
 			Worksheet work = excel.Read(0);
 			int rowIndex = 0;
 

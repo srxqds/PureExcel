@@ -13,17 +13,6 @@ namespace PureExcel
 {
     public class Worksheet
     {
-        //common escape char by xml
-        public const string LtEscape = "&lt;";//<
-        public const string Lt = "<";
-        public const string GtEscape = "&gt;";//>
-        public const string Gt = ">";
-        public const string AmpEscape = "&amp;";//&
-        public const string Amp = "&";
-        public const string AposEscape = "&apos;";//'
-        public const string Apos = "'";
-        public const string QuotEscape = "&quot;";//"
-        public const string Quot = "\"";
         /// <summary>
         /// Collection of rows in this worksheet
         /// </summary>
@@ -34,13 +23,13 @@ namespace PureExcel
         public int RowCount { get; internal set; }
         public int ColumnCount { get; internal set; }
 
-        public Excel Excel { get; private set; }
+        internal Excel m_Excel { get; private set; }
+        private int m_ColumnStart { get; set; }
 
-        private int ColumnStart { get; set; }
-
-        public Worksheet(Excel excel)
+        internal Worksheet(Excel mExcel)
         {
-            Excel = excel;
+            m_ColumnStart = 1;
+            m_Excel = mExcel;
         }
 
         //rowIndex and columnIndex begin from 0.
@@ -49,33 +38,25 @@ namespace PureExcel
         {
             if (!IsCeilValid(rowIndex, columnIndex))
                 return defaultValue;
-
             Row row = this.Rows[rowIndex];
-            Cell cell = row.GetCell(columnIndex + ColumnStart);
+            Cell cell = row.GetCell(columnIndex + m_ColumnStart);
             if (cell == null)
                 return defaultValue;
-            string cellValue = cell.Value;
-            cellValue = cellValue.Replace(LtEscape, Lt);
-            cellValue = cellValue.Replace(GtEscape, Gt);
-            cellValue = cellValue.Replace(AmpEscape, Amp);
-            cellValue = cellValue.Replace(AposEscape, Apos);
-            cellValue = cellValue.Replace(QuotEscape, Quot);
-            return cellValue;
+            return Cell.DecodeEscapeString(cell.Value);
         }
 
         public string GetComment(int rowIndex, int columnIndex)
         {
             string commentFile = "xl/comments" + Index + ".xml";
-            string commentText = this.Excel.Archive.GetXmlText(commentFile);
-            XMLNode commentRootNode = XMLParser.Parse(commentText);
-
+            XMLNode commentRootNode = this.m_Excel.m_Archive.GetXmlNode(commentFile);
+            if (commentRootNode == null)
+                return null;
             //default value
-            int columnName = columnIndex + 1;
+            int columnName = columnIndex + m_ColumnStart;
             int rowName = rowIndex + 1;
             if (this.Rows != null && this.Rows.Count > rowIndex)
             {
                 Row row = this.Rows[rowIndex];
-                columnName = columnIndex + ColumnStart;
                 rowName = row.RowIndex;
             }
             string commentCeilName = Cell.GetExcelColumnName(columnName) + rowName;
@@ -104,11 +85,13 @@ namespace PureExcel
         public void Read()
         {
             string fileNameInZip = string.Format("xl/worksheets/sheet{0}.xml", Index);
-            XMLNode document = XMLParser.Parse(Excel.Archive.GetXmlText(fileNameInZip));
-            XMLNodeList rowList = document.GetNodeList("worksheet>0>sheetData>0>row");
-
-            Rows = GetRows(rowList);
-            this.RowCount = Rows.Count;
+            XMLNode document = m_Excel.m_Archive.GetXmlNode(fileNameInZip);
+            if (document != null)
+            {
+                XMLNodeList rowList = document.GetNodeList("worksheet>0>sheetData>0>row");
+                Rows = GetRows(rowList);
+                this.RowCount = Rows.Count;
+            }
         }
 
 		private List<Row> GetRows(XMLNodeList rowElements)
@@ -117,17 +100,17 @@ namespace PureExcel
 		    int columnEnd = 0;
             foreach (XMLNode rowElement in rowElements)
             {
-                Row row = new Row(rowElement, Excel.SharedStrings);
+                Row row = new Row(rowElement, m_Excel.m_SharedStrings);
                 if (row.Cells != null && row.Cells.Count != 0)
                 {
                     rowList.Add(row);
-                    if (row.ColumnStart < ColumnStart)
-                        ColumnStart = row.ColumnStart;
-                    if (row.ColumnEnd > columnEnd)
-                        columnEnd = row.ColumnEnd;
+                    if (row.m_ColumnStart < m_ColumnStart)
+                        m_ColumnStart = row.m_ColumnStart;
+                    if (row.m_ColumnEnd > columnEnd)
+                        columnEnd = row.m_ColumnEnd;
                 }
             }
-		    this.ColumnCount = columnEnd - this.ColumnStart;
+		    this.ColumnCount = columnEnd - this.m_ColumnStart;
 		    return rowList;
         }
     }

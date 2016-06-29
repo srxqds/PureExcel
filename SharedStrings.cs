@@ -18,50 +18,45 @@ namespace PureExcel
     public class SharedStrings
     {
         //A dictionary is a lot faster than a list
-        private List<string> StringArray { get; set; }
-        private bool SharedStringsExists { get; set; }
+        private List<string> m_StringArray { get; set; }
+        private bool m_SharedStringsExist { get; set; }
 
         internal SharedStrings(ZipArchive archive)
         {
-            this.SharedStringsExists = true;
-			this.StringArray = new List<string> ();
-			string xmlText= archive.GetXmlText ("xl/sharedStrings.xml");
-			if (string.IsNullOrEmpty (xmlText))
+            this.m_SharedStringsExist = true;
+			this.m_StringArray = new List<string> ();
+			
+			XMLNode document = archive.GetXmlNode("xl/sharedStrings.xml");
+            if (document == null)
             {
-				this.SharedStringsExists = false;
+				this.m_SharedStringsExist = false;
+				return;
 			}
-            else
-            {
-				XMLNode document = XMLParser.Parse (xmlText);
-				if (document == null)
-                {
-					this.SharedStringsExists = false;
-					return;
-				}
-				//List<XMLNode> nodeList = new List<XMLNode> ();
-                //only one share string in one si!!!
-				XMLNodeList siNodeList = document.GetNodeList ("sst>0>si");
-				foreach (XMLNode node in siNodeList)
+			//List<XMLNode> nodeList = new List<XMLNode> ();
+            //only one share string in one si!!!
+			XMLNodeList siNodeList = document.GetNodeList ("sst>0>si");
+			foreach (XMLNode node in siNodeList)
+			{
+				XMLNodeList tList = node.GetDeepNodeList("t");
+                //handle for <t xml:space="preserve"> </t>
+				string tValue = string.Empty;
+				foreach (var tNode in tList)
 				{
-				    XMLNodeList tList = node.GetDeepNodeList("t");
-                    //handle for <t xml:space="preserve"> </t>
-				    string tValue = string.Empty;
-				    foreach (var tNode in tList)
-				    {
-				        tValue += tNode.GetValue("_text");
-                    }
-                    this.StringArray.Add(tValue);
+				    tValue += tNode.GetValue("_text");
                 }
-			}
+                this.m_StringArray.Add(tValue);
+            }
         }
 
         internal string GetString(string position)
         {
+            if (!m_SharedStringsExist)
+                return null;
             int pos = 0;
             if (int.TryParse(position, out pos))
             {
-				if (pos >= 0 && pos < this.StringArray.Count)
-					return StringArray[pos];
+				if (pos >= 0 && pos < this.m_StringArray.Count)
+					return m_StringArray[pos];
             }
             // TODO: should I throw an error? this is a corrupted excel document
             return string.Empty;

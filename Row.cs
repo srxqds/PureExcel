@@ -28,12 +28,12 @@ namespace PureExcel
         /// </summary>
         public List<Cell> Cells { get; internal set; }
 
-        internal int ColumnStart { get; private set; }
-        internal int ColumnEnd { get; private set; }
+        internal int m_ColumnStart { get; private set; }
+        internal int m_ColumnEnd { get; private set; }
 
 		internal Row(XMLNode rowElement, SharedStrings sharedStrings)
         {
-            ColumnStart = 1;
+            m_ColumnStart = 1;
             try
             {
 				this.RowIndex = int.Parse(rowElement.GetValue("@r"));
@@ -75,10 +75,10 @@ namespace PureExcel
                     if (!string.IsNullOrEmpty(valueTrim))
                     {
                         cellList.Add(cell);
-                        if (cell.ColumnIndex < ColumnStart)
-                            ColumnStart = cell.ColumnIndex;
-                        else if (cell.ColumnIndex > ColumnEnd)
-                            ColumnEnd = cell.ColumnIndex;
+                        if (cell.ColumnIndex < m_ColumnStart)
+                            m_ColumnStart = cell.ColumnIndex;
+                        else if (cell.ColumnIndex > m_ColumnEnd)
+                            m_ColumnEnd = cell.ColumnIndex;
                     }
                 }
             }
