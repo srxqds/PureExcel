@@ -33,6 +33,8 @@ Todo:
 
 5.More optimization and test case!
 
+6.Excel formula parsing!
+
 Inspired By:
 
 1.FastExcel:https://github.com/mrjono1/FastExcel/tree/master/FastExcel
