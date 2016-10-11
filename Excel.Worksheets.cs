@@ -43,7 +43,7 @@ namespace PureExcel
 			foreach (XMLNode node in nodeList)
             {
                 var worksheet = new Worksheet(this);
-				worksheet.Index = int.Parse(node.GetValue ("@sheetId"));
+				worksheet.Index = int.Parse(node.GetValue("@r:id").Replace("rId", ""));
 				worksheet.Name = node.GetValue ("@name");
                 worksheets.Add(worksheet);
             }
