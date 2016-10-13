@@ -33,7 +33,9 @@ Todo:
 
 5.More optimization and test case!
 
-6.Excel formula parsing!
+6.Support stream parser!
+
+7.Excel formula parsing!
 
 Inspired By:
 
